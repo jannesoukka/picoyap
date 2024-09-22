@@ -14,3 +14,25 @@ Varmasti tulevat:
 Ehkä:
 - käyttäjän hakusana voi ottaa huomioon taivutetut muodot viestien hakemisessa
 - käyttäjä voi hakea viestejä myös viestin lähettäjän ja ajankohdan perusteella.
+
+-------------------------------
+
+PÄIVITYS 22.9.2024:
+
+- tilanne: Sovellus on oikeastaan alkutekijöissään. Se toki pyörittää; se ei siis heitä virhettä. Etusivun ja Femtoyapin sivupohjat ovat toiminnassa. Etusivulla on lista Femtoyapeista, ja niitä voi klikata, jotta niihin pääsee.
+
+- testaaminen: Sovellusta ei voi testata Fly.io-palvelussa. Tässä ohjeet testaamiseen: 
+
+git clone https://github.com/jannesoukka/picoyap.git
+cd picoyap/
+python3 -m venv venv
+source venv/bin/activate
+pip install flask
+pip install flask sql-alchemy
+pip install psycopg2-binary
+pip install python-dotenv
+
+luo .env tiedosto jossa määrittelet ympäristömuuttujat (niitä on kaksi: SECRET_KEY ja DATABASE_URL)
+
+suorita myös komento ennen ohjelman suorittamista:
+psql < schema.sql
