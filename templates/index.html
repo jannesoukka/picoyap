@@ -1,1 +1,8 @@
-etusivu
+<title>picoyap - Front page</title>
+<h1>picoyap - Front page</h1>
+PUBLIC FEMTOYAPS:
+<hr>
+{% for femtoyap in femtoyaps %}
+<a href="/femtoyap{{ femtoyap.id }}">{{ femtoyap.topic }}</a><br>
+{% endfor %}
+<hr>

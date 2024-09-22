@@ -11,4 +11,17 @@ db = SQLAlchemy(app)
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    sql = "SELECT id, topic FROM femtoyaps"
+    result = db.session.execute(text(sql))
+    femtoyaps = result.fetchall()
+    return render_template("index.html", femtoyaps=femtoyaps)
+
+@app.route("/femtoyap<int:id>")
+def femtoyap(id):
+    sql = "SELECT title FROM attoyaps WHERE femtoyap_id=:id"
+    result = db.session.execute(text(sql), {"id":id})
+    attoyaps = result.fetchall()
+    sql = "SELECT topic FROM femtoyaps WHERE id=:id"
+    result = db.session.execute(text(sql), {"id":id})
+    topic = result.fetchone()[0]
+    return render_template("femtoyap.html", topic=topic, attoyaps=attoyaps)
