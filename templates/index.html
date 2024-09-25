@@ -4,5 +4,13 @@ PUBLIC FEMTOYAPS:
 <hr>
 {% for femtoyap in femtoyaps %}
 <a href="/femtoyaps/{{ femtoyap.id }}">{{ femtoyap.topic }}</a><br>
-{% endfor %}
+attoyaps: {{ femtoyap.attoyap_count }} | zeptoyaps: {{ femtoyap.zeptoyap_count }}
+{% if femtoyap.latest_attoyap %}
+ | latest attoyap: {{ femtoyap.latest_attoyap.strftime("%Y-%m-%d %H:%M:%S") }}
+{% if femtoyap.latest_zeptoyap %}
+ | latest zeptoyap: {{ femtoyap.latest_zeptoyap.strftime("%Y-%m-%d %H:%M:%S") }}
+{% endif %}
+{% endif %}
+<br>
 <hr>
+{% endfor %}

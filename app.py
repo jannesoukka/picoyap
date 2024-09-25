@@ -11,7 +11,9 @@ db = SQLAlchemy(app)
 
 @app.route("/")
 def index():
-    sql = "SELECT id, topic FROM femtoyaps"
+    sql = "SELECT f.id, f.topic, COALESCE(COUNT(DISTINCT a.id),0) AS attoyap_count, COALESCE(COUNT(z.id),0) AS zeptoyap_count, " \
+          "MAX(a.created_at) AS latest_attoyap, MAX(z.created_at) AS latest_zeptoyap " \
+          "FROM femtoyaps f LEFT JOIN attoyaps a ON f.id = a.femtoyap_id LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id GROUP BY f.id"
     result = db.session.execute(text(sql))
     femtoyaps = result.fetchall()
     return render_template("index.html", femtoyaps=femtoyaps)
