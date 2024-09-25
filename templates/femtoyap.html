@@ -1,8 +1,12 @@
 <title>picoyap - femtoyap</title>
-<h1>picoyap - {{ topic }}</h1>
+<a href="/">Return to front page...</a>
+<hr>
+<h1>femtoyap - {{ topic }}</h1>
 TOPICAL ATTOYAPS:
 <hr>
 {% for attoyap in attoyaps %}
-{{ attoyap.title }}<br>
+<a href="/femtoyaps/{{ id }}/attoyaps/{{ attoyap.id }}">{{ attoyap.title }}</a><br>
 {% endfor %}
+<hr>
+<a href="/">Return to front page...</a>
 <hr>

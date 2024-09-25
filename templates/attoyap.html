@@ -1,0 +1,12 @@
+<title>picoyap - attoyap</title>
+<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a>
+<hr>
+<h1>attoyap - {{ title }}</h1>
+ZEPTOYAPS:
+<hr>
+{% for zeptoyap in zeptoyaps %}
+{{ zeptoyap.content }}<br>
+{% endfor %}
+<hr>
+<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a>
+<hr>

@@ -16,12 +16,22 @@ def index():
     femtoyaps = result.fetchall()
     return render_template("index.html", femtoyaps=femtoyaps)
 
-@app.route("/femtoyap<int:id>")
+@app.route("/femtoyaps/<int:id>")
 def femtoyap(id):
-    sql = "SELECT title FROM attoyaps WHERE femtoyap_id=:id"
+    sql = "SELECT id, title FROM attoyaps WHERE femtoyap_id=:id"
     result = db.session.execute(text(sql), {"id":id})
     attoyaps = result.fetchall()
     sql = "SELECT topic FROM femtoyaps WHERE id=:id"
     result = db.session.execute(text(sql), {"id":id})
     topic = result.fetchone()[0]
-    return render_template("femtoyap.html", topic=topic, attoyaps=attoyaps)
+    return render_template("femtoyap.html", topic=topic, attoyaps=attoyaps, id=id)
+
+@app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/<int:attoyap_id>")
+def attoyap(femtoyap_id, attoyap_id):
+    sql = "SELECT content FROM zeptoyaps WHERE attoyap_id=:attoyap_id"
+    result = db.session.execute(text(sql), {"attoyap_id":attoyap_id})
+    zeptoyaps = result.fetchall()
+    sql = "SELECT title FROM attoyaps WHERE id=:attoyap_id"
+    result = db.session.execute(text(sql), {"attoyap_id":attoyap_id})
+    title = result.fetchone()[0]
+    return render_template("attoyap.html", title=title, zeptoyaps=zeptoyaps, femtoyap_id=femtoyap_id)
