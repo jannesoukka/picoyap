@@ -1,12 +1,16 @@
 <title>picoyap - femtoyap</title>
 <a href="/">Return to front page...</a>
 <hr>
-<h1>femtoyap - {{ topic }}</h1>
+<h1>femtoyap - {{ femtoyap_topic }}</h1>
 TOPICAL ATTOYAPS:
 <hr>
 {% for attoyap in attoyaps %}
-<a href="/femtoyaps/{{ id }}/attoyaps/{{ attoyap.id }}">{{ attoyap.title }}</a><br>
-{% endfor %}
+<a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap.id }}">{{ attoyap.title }}</a><br>
+zeptoyaps: {{ attoyap.zeptoyap_count }}
+{% if attoyap.latest_zeptoyap %}
+ | latest zeptoyap: {{ attoyap.latest_zeptoyap.strftime("%Y-%m-%d %H:%M:%S") }}
+{% endif %}
 <hr>
+{% endfor %}
 <a href="/">Return to front page...</a>
 <hr>

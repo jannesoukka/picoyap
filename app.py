@@ -18,15 +18,16 @@ def index():
     femtoyaps = result.fetchall()
     return render_template("index.html", femtoyaps=femtoyaps)
 
-@app.route("/femtoyaps/<int:id>")
-def femtoyap(id):
-    sql = "SELECT id, title FROM attoyaps WHERE femtoyap_id=:id"
-    result = db.session.execute(text(sql), {"id":id})
+@app.route("/femtoyaps/<int:femtoyap_id>")
+def femtoyap(femtoyap_id):
+    sql = "SELECT a.id, a.title, COALESCE(COUNT(z.id),0) AS zeptoyap_count, MAX(z.created_at) AS latest_zeptoyap " \
+          "FROM attoyaps a LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id WHERE a.femtoyap_id=:femtoyap_id GROUP BY a.id"
+    result = db.session.execute(text(sql), {"femtoyap_id":femtoyap_id})
     attoyaps = result.fetchall()
-    sql = "SELECT topic FROM femtoyaps WHERE id=:id"
-    result = db.session.execute(text(sql), {"id":id})
-    topic = result.fetchone()[0]
-    return render_template("femtoyap.html", topic=topic, attoyaps=attoyaps, id=id)
+    sql = "SELECT topic FROM femtoyaps WHERE id=:femtoyap_id"
+    result = db.session.execute(text(sql), {"femtoyap_id":femtoyap_id})
+    femtoyap_topic = result.fetchone()[0]
+    return render_template("femtoyap.html", femtoyap_topic=femtoyap_topic, attoyaps=attoyaps, femtoyap_id=femtoyap_id)
 
 @app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/<int:attoyap_id>")
 def attoyap(femtoyap_id, attoyap_id):
