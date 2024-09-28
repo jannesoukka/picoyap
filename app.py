@@ -13,7 +13,8 @@ db = SQLAlchemy(app)
 def index():
     sql = "SELECT f.id, f.topic, COALESCE(COUNT(DISTINCT a.id),0) AS attoyap_count, COALESCE(COUNT(z.id),0) AS zeptoyap_count, " \
           "MAX(a.created_at) AS latest_attoyap, MAX(z.created_at) AS latest_zeptoyap " \
-          "FROM femtoyaps f LEFT JOIN attoyaps a ON f.id = a.femtoyap_id LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id GROUP BY f.id"
+          "FROM femtoyaps f LEFT JOIN attoyaps a ON f.id = a.femtoyap_id LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id GROUP BY f.id " \
+          "ORDER BY f.topic"
     result = db.session.execute(text(sql))
     femtoyaps = result.fetchall()
     return render_template("index.html", femtoyaps=femtoyaps)
@@ -21,7 +22,7 @@ def index():
 @app.route("/femtoyaps/<int:femtoyap_id>")
 def femtoyap(femtoyap_id):
     sql = "SELECT a.id, a.title, COALESCE(COUNT(z.id),0) AS zeptoyap_count, MAX(z.created_at) AS latest_zeptoyap " \
-          "FROM attoyaps a LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id WHERE a.femtoyap_id=:femtoyap_id GROUP BY a.id"
+          "FROM attoyaps a LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id WHERE a.femtoyap_id=:femtoyap_id GROUP BY a.id ORDER BY a.created_at DESC"
     result = db.session.execute(text(sql), {"femtoyap_id":femtoyap_id})
     attoyaps = result.fetchall()
     sql = "SELECT topic FROM femtoyaps WHERE id=:femtoyap_id"
@@ -31,7 +32,7 @@ def femtoyap(femtoyap_id):
 
 @app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/<int:attoyap_id>")
 def attoyap(femtoyap_id, attoyap_id):
-    sql = "SELECT content FROM zeptoyaps WHERE attoyap_id=:attoyap_id"
+    sql = "SELECT content, created_at FROM zeptoyaps WHERE attoyap_id=:attoyap_id ORDER BY created_at DESC"
     result = db.session.execute(text(sql), {"attoyap_id":attoyap_id})
     zeptoyaps = result.fetchall()
     sql = "SELECT title FROM attoyaps WHERE id=:attoyap_id"
