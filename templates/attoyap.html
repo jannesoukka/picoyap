@@ -1,5 +1,10 @@
 <title>picoyap - attoyap</title>
-<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | <a href="/signup">Create a new account...</a>
+<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | 
+{% if session.username %}
+Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+{% else %}
+<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
+{% endif %}
 <hr>
 <h1>attoyap - {{ title }}</h1>
 ZEPTOYAPS:
@@ -9,5 +14,10 @@ ZEPTOYAPS:
 {{ zeptoyap.created_at.strftime("%Y-%m-%d %H:%M:%S") }}
 <hr>
 {% endfor %}
-<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | <a href="/signup">Create a new account...</a>
+<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | 
+{% if session.username %}
+Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+{% else %}
+<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
+{% endif %}
 <hr>

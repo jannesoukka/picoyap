@@ -1,5 +1,10 @@
 <title>picoyap - femtoyap</title>
-<a href="/">Return to front page...</a> | <a href="/signup">Create a new account...</a>
+<a href="/">Return to front page...</a> | 
+{% if session.username %}
+Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+{% else %}
+<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
+{% endif %}
 <hr>
 <h1>femtoyap - {{ femtoyap_topic }}</h1>
 TOPICAL ATTOYAPS:
@@ -12,5 +17,10 @@ zeptoyaps: {{ attoyap.zeptoyap_count }}
 {% endif %}
 <hr>
 {% endfor %}
-<a href="/">Return to front page...</a> | <a href="/signup">Create a new account...</a>
+<a href="/">Return to front page...</a> | 
+{% if session.username %}
+Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+{% else %}
+<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
+{% endif %}
 <hr>

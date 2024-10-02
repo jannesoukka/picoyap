@@ -1,5 +1,9 @@
 <title>picoyap - Front page</title>
-<a href="/signup">Create a new account...</a>
+{% if session.username %}
+Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+{% else %}
+<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
+{% endif %}
 <hr>
 <h1>picoyap - Front page</h1>
 PUBLIC FEMTOYAPS:
@@ -15,5 +19,9 @@ attoyaps: {{ femtoyap.attoyap_count }} | zeptoyaps: {{ femtoyap.zeptoyap_count }
 {% endif %}
 <hr>
 {% endfor %}
-<a href="/signup">Create a new account...</a>
+{% if session.username %}
+Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+{% else %}
+<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
+{% endif %}
 <hr>

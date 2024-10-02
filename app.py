@@ -1,10 +1,11 @@
 from sqlalchemy.sql import text
 from flask import Flask
-from flask import render_template, request
+from flask import redirect, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from os import getenv
 import re
 from werkzeug.security import check_password_hash, generate_password_hash
+from secrets import token_hex
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
@@ -43,7 +44,7 @@ def attoyap(femtoyap_id, attoyap_id):
     return render_template("attoyap.html", title=title, zeptoyaps=zeptoyaps, femtoyap_id=femtoyap_id)
 
 @app.route("/signup", methods=["GET", "POST"])
-def signup_attempt():
+def signup():
     if request.method == "GET":
         return render_template("signup.html")
     else:
@@ -75,5 +76,36 @@ def signup_attempt():
             new_attempt_path = "/signup"
             new_attempt_name = "signup"
             return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
-        message = "Successfully created a new account."
+        session["username"] = username
+        message = f"Successfully created a new account. You are now logged in as {username}."
         return render_template("success.html", message=message)
+    
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+    else:
+        username = request.form["username"]
+        password = request.form["password"]
+        sql = "SELECT password_hash FROM users WHERE username=:username"
+        result = db.session.execute(text(sql), {"username":username})
+        user = result.fetchone()
+        if not user:
+            message = "Username does not exist"
+            new_attempt_path = "/login"
+            new_attempt_name = "login"
+            return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
+        if check_password_hash(user.password_hash, password):
+            session["username"] = username
+            message = f"Successfully logged in as {username}."
+            return render_template("success.html", message=message)
+        else:
+            message = "Wrong password"
+            new_attempt_path = "/login"
+            new_attempt_name = "login"
+            return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
+        
+@app.route("/logout")
+def logout():
+    del session["username"]
+    return redirect("/")
