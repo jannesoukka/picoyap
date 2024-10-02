@@ -1,0 +1,16 @@
+<title>picoyap - error</title>
+<a href="/">Return to front page...</a>
+{% if new_attempt_path != None %}
+ | <a href="{{ new_attempt_path }}">Return to {{ new_attempt_name }} page...</a>
+{% endif %}
+<hr>
+<h1>attoyap - error</h1>
+ERROR:
+<hr>
+{{ message }}
+<hr>
+<a href="/">Return to front page...</a>
+{% if new_attempt_path != None %}
+ | <a href="{{ new_attempt_path }}">Return to {{ new_attempt_name }} page...</a>
+{% endif %}
+<hr>

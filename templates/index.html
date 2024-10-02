@@ -1,4 +1,6 @@
 <title>picoyap - Front page</title>
+<a href="/signup">Create a new account...</a>
+<hr>
 <h1>picoyap - Front page</h1>
 PUBLIC FEMTOYAPS:
 <hr>
@@ -11,6 +13,7 @@ attoyaps: {{ femtoyap.attoyap_count }} | zeptoyaps: {{ femtoyap.zeptoyap_count }
  | latest zeptoyap: {{ femtoyap.latest_zeptoyap.strftime("%Y-%m-%d %H:%M:%S") }}
 {% endif %}
 {% endif %}
-<br>
 <hr>
 {% endfor %}
+<a href="/signup">Create a new account...</a>
+<hr>

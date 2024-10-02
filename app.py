@@ -3,6 +3,8 @@ from flask import Flask
 from flask import render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from os import getenv
+import re
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = getenv("DATABASE_URL")
@@ -39,3 +41,39 @@ def attoyap(femtoyap_id, attoyap_id):
     result = db.session.execute(text(sql), {"attoyap_id":attoyap_id})
     title = result.fetchone()[0]
     return render_template("attoyap.html", title=title, zeptoyaps=zeptoyaps, femtoyap_id=femtoyap_id)
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup_attempt():
+    if request.method == "GET":
+        return render_template("signup.html")
+    else:
+        username = request.form["username"]
+        password = request.form["password"]
+        password_again = request.form["password_again"]
+        if not re.search("^[\w._\-]{2,32}$", username):
+            message = "Invalid username"
+            new_attempt_path = "/signup"
+            new_attempt_name = "signup"
+            return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
+        if password != password_again:
+            message = "Password inputs do not match"
+            new_attempt_path = "/signup"
+            new_attempt_name = "signup"
+            return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
+        if len(password) < 8 or len(password) > 5000:
+            message = "Invalid password length"
+            new_attempt_path = "/signup"
+            new_attempt_name = "signup"
+            return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
+        password_hash = generate_password_hash(password)
+        try:
+            sql = "INSERT INTO users (username, password_hash) VALUES (:username, :password_hash)"
+            db.session.execute(text(sql), {"username":username, "password_hash":password_hash})
+            db.session.commit()
+        except:
+            message = "Username already taken"
+            new_attempt_path = "/signup"
+            new_attempt_name = "signup"
+            return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
+        message = "Successfully created a new account."
+        return render_template("success.html", message=message)
