@@ -1,6 +1,9 @@
 <form action="/login" method="POST">
 <title>picoyap - login</title>
 <a href="/">Return to front page...</a>
+{% if session.username %}
+ | Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+{% endif %}
 <hr>
 <h1>picoyap - login</h1>
 FILL IN ALL NECESSARY INFO:
@@ -12,4 +15,5 @@ Password:<br>
 <input type="password" name="password" minlength="1" maxlength="5000" required>
 <hr>
 <input type="submit" name="Attempt login">
+<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 </form>

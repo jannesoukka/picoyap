@@ -46,8 +46,11 @@ def attoyap(femtoyap_id, attoyap_id):
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "GET":
+        session["csrf_token"] = token_hex(16) # temp token to prevent creating accounts unintentionally. not final product as it assumes only that you're not logged in. 
         return render_template("signup.html")
     else:
+        if session["csrf_token"] != request.form["csrf_token"]:
+            abort(403)
         username = request.form["username"]
         password = request.form["password"]
         password_again = request.form["password_again"]
@@ -76,15 +79,23 @@ def signup():
             new_attempt_path = "/signup"
             new_attempt_name = "signup"
             return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
+        if "username" in session:
+            message = "logged out and "
+        else:
+            message = ""
         session["username"] = username
-        message = f"Successfully created a new account. You are now logged in as {username}."
+        session["csrf_token"] = token_hex(16)
+        message = f"Successfully {message}created a new account. You are now logged in as {username}."
         return render_template("success.html", message=message)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
+        session["csrf_token"] = token_hex(16)
         return render_template("login.html")
     else:
+        if session["csrf_token"] != request.form["csrf_token"]:
+            abort(403)
         username = request.form["username"]
         password = request.form["password"]
         sql = "SELECT password_hash FROM users WHERE username=:username"
@@ -96,8 +107,13 @@ def login():
             new_attempt_name = "login"
             return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
         if check_password_hash(user.password_hash, password):
+            if "username" in session:
+                message = "logged out and "
+            else:
+                message = ""
             session["username"] = username
-            message = f"Successfully logged in as {username}."
+            session["csrf_token"] = token_hex(16)
+            message = f"Successfully {message}logged in as {username}."
             return render_template("success.html", message=message)
         else:
             message = "Wrong password"
@@ -105,7 +121,18 @@ def login():
             new_attempt_name = "login"
             return render_template("error.html", message=message, new_attempt_path=new_attempt_path, new_attempt_name=new_attempt_name)
         
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
-    del session["username"]
-    return redirect("/")
+    if request.method == "GET":
+        if not "username" in session:
+            message = "Cannot log out if not logged in the first place!"
+            return render_template("error.html", message=message)
+        else:
+            return render_template("logout.html")
+    else:
+        if session["csrf_token"] != request.form["csrf_token"]:
+            abort(403)
+        del session["username"]
+        del session["csrf_token"]
+        message = "Successfully logged out."
+        return render_template("success.html", message=message)
