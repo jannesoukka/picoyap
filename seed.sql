@@ -20,6 +20,11 @@ INSERT INTO users (username, password_hash) VALUES (
     'Clemens',
     'ie092sssssssssss3'
 );
+INSERT INTO users (username, is_admin, password_hash) VALUES (
+    'admintest',
+    't',
+    'scrypt:32768:8:1$LlTvbqb7zPXkXaWF$e14d963ba1bbb6b8bc48b5495efe3446c6f983d77a085895db8aef20fd534f832047faeb7b2c2cdeb268097ec2d503d6d520d0256e3ef8f41ef40a010b64c543'
+);
 
 INSERT INTO femtoyaps (creator_id, topic) VALUES (
     '1',
