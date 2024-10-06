@@ -1,0 +1,14 @@
+<form action="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap_id }}/zeptoyaps/create" method="POST">
+<title>picoyap - create zeptoyap</title>
+<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap_id }}">Return to the attoyap...</a> | Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
+<hr>
+<h1>zeptoyap - create</h1>
+FILL IN ALL NECESSARY INFO.<br>
+Restrictions: The zeptoyap must be within 0-5000 characters.
+<hr>
+Content:<br>
+<textarea name="zeptoyap_content" rows="20" cols="100" maxlength="5000"></textarea><br>
+<hr>
+<input type="submit" name="Confirm zeptoyap creation">
+<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+</form>

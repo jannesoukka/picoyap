@@ -1,7 +1,7 @@
 <title>picoyap - error</title>
 <a href="/">Return to front page...</a>
-{% if new_attempt_path != None %}
- | <a href="{{ new_attempt_path }}">Return to {{ new_attempt_name }} page...</a>
+{% if suggested_path != None %}
+ | <a href="{{ suggested_path }}">Go to {{ suggestion_name }} page...</a>
 {% endif %}
 <hr>
 <h1>picoyap - error</h1>
@@ -10,7 +10,7 @@ ERROR:
 {{ message }}
 <hr>
 <a href="/">Return to front page...</a>
-{% if new_attempt_path != None %}
- | <a href="{{ new_attempt_path }}">Return to {{ new_attempt_name }} page...</a>
+{% if suggested_path != None %}
+ | <a href="{{ suggested_path }}">Go to {{ suggestion_name }} page...</a>
 {% endif %}
 <hr>
