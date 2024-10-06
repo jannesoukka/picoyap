@@ -1,9 +1,10 @@
 from app import app, db
+import content
+import errors
 from flask import abort, redirect, render_template, request, session
 import re
-from secrets import token_hex
 from sqlalchemy.sql import text
-from werkzeug.security import check_password_hash, generate_password_hash
+import users
 
 @app.route("/")
 def index():
@@ -21,8 +22,7 @@ def femtoyap(femtoyap_id):
     result = db.session.execute(text(sql), {"femtoyap_id":femtoyap_id})
     femtoyap = result.fetchone()
     if not femtoyap:
-        message = "Either the femtoyap does not exist or access to it is restricted."
-        return render_template("error.html", message=message)
+        return errors.render_error("Either the femtoyap does not exist or access to it is restricted.")
     femtoyap_topic = femtoyap[0]
     sql = "SELECT a.id, a.title, a.created_at, u.username, COALESCE(COUNT(z.id),0) AS zeptoyap_count, MAX(z.created_at) AS latest_zeptoyap " \
           "FROM attoyaps a LEFT JOIN users u ON a.creator_id = u.id LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id " \
@@ -37,8 +37,7 @@ def attoyap(femtoyap_id, attoyap_id):
     result = db.session.execute(text(sql), {"attoyap_id":attoyap_id})
     attoyap = result.fetchone()
     if not attoyap:
-        message = "Either the attoyap does not exist or access to it is restricted."
-        return render_template("error.html", message=message)
+        return errors.render_error("Either the attoyap does not exist or access to it is restricted.")
     if femtoyap_id != attoyap[0]:
         femtoyap_id = attoyap[0]
         return redirect(f"/femtoyaps/{femtoyap_id}/attoyaps/{attoyap_id}")
@@ -51,131 +50,69 @@ def attoyap(femtoyap_id, attoyap_id):
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "GET":
-        session["csrf_token"] = token_hex(16)
+        users.csrf_new()
         return render_template("signup.html")
     else:
-        if session["csrf_token"] != request.form["csrf_token"]:
+        if not users.csrf_check():
             abort(403)
         else:
             username = request.form["username"]
             password = request.form["password"]
             password_again = request.form["password_again"]
-            if not re.search("^[\w._\-]{2,32}$", username):
-                message = "Invalid username"
-                suggested_path = "/signup"
-                suggestion_name = "signup"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
-            if password != password_again:
-                message = "Password inputs do not match"
-                suggested_path = "/signup"
-                suggestion_name = "signup"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
-            if len(password) < 8 or len(password) > 5000:
-                message = "Invalid password length"
-                suggested_path = "/signup"
-                suggestion_name = "signup"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
-            password_hash = generate_password_hash(password)
-            try:
-                sql = "INSERT INTO users (username, password_hash) VALUES (:username, :password_hash)"
-                db.session.execute(text(sql), {"username":username, "password_hash":password_hash})
-                db.session.commit()
-            except:
-                message = "Username already taken"
-                suggested_path = "/signup"
-                suggestion_name = "signup"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
-            if "username" in session:
-                message = "logged out and "
-            else:
-                message = ""
-            session["username"] = username
-            session["csrf_token"] = token_hex(16)
-            message = f"Successfully {message}created a new account. You are now logged in as {username}."
-            return render_template("success.html", message=message)
+            return users.signup(username, password, password_again)
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        session["csrf_token"] = token_hex(16)
+        users.csrf_new()
         return render_template("login.html")
     else:
-        if session["csrf_token"] != request.form["csrf_token"]:
+        if not users.csrf_check():
             abort(403)
         else:
             username = request.form["username"]
             password = request.form["password"]
-            sql = "SELECT password_hash FROM users WHERE username=:username"
-            result = db.session.execute(text(sql), {"username":username})
-            user = result.fetchone()
-            if not user:
-                message = "Username does not exist"
-                suggested_path = "/login"
-                suggestion_name = "login"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
-            if check_password_hash(user.password_hash, password):
-                if "username" in session:
-                    message = "logged out and "
-                else:
-                    message = ""
-                session["username"] = username
-                session["csrf_token"] = token_hex(16)
-                message = f"Successfully {message}logged in as {username}."
-                return render_template("success.html", message=message)
-            else:
-                message = "Wrong password"
-                suggested_path = "/login"
-                suggestion_name = "login"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+            login_ok = users.login_ok(username, password)
+            if not login_ok[0]:
+                return errors.render_error(login_ok[1], "login")
+            return users.login(username)
         
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     if request.method == "GET":
-        if not "username" in session:
-            message = "Cannot log out if not logged in the first place!"
-            suggested_path = "/login"
-            suggestion_name = "login"
-            return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+        if not users.is_logged_in():
+            return errors.render_error("Cannot log out if not logged in the first place!", "login")
         return render_template("logout.html")
     else:
-        if session["csrf_token"] != request.form["csrf_token"]:
+        if not users.csrf_check():
             abort(403)
         else:
-            del session["username"]
-            del session["csrf_token"]
-            message = "Successfully logged out."
-            return render_template("success.html", message=message)
+            return users.logout()
     
 @app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/create", methods=["GET", "POST"])
 def create_attoyap(femtoyap_id):
     if request.method == "GET":
-        if not "username" in session:
-            message = "You must be logged in to create attoyaps!"
-            suggested_path = "/login"
-            suggestion_name = "login"
-            return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+        if not users.is_logged_in():
+            return errors.render_error("You must be logged in to create attoyaps!", "login")
         return render_template("create_attoyap.html", femtoyap_id=femtoyap_id)
     else:
-        if session["csrf_token"] != request.form["csrf_token"]:
+        if not users.csrf_check():
             abort(403)
         else:
             attoyap_title = request.form["attoyap_title"]
             zeptoyap_content = request.form["zeptoyap_content"]
             if len(attoyap_title) < 1:
-                message = "The title is too short, less than 1 character!"
-                suggested_path = f"/femtoyaps/{femtoyap_id}/attoyaps/create"
-                suggestion_name = "attoyap creation"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+                return errors.render_error("The title is too short, less than 1 character!", 
+                                           "attoyap creation", 
+                                           f"/femtoyaps/{femtoyap_id}/attoyaps/create")
             if len(attoyap_title) > 100:
-                message = "The title is too long, over 100 characters!"
-                suggested_path = f"/femtoyaps/{femtoyap_id}/attoyaps/create"
-                suggestion_name = "attoyap creation"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+                return errors.render_error("The title is too long, over 100 characters!", 
+                                           "attoyap creation", 
+                                           f"/femtoyaps/{femtoyap_id}/attoyaps/create")
             if len(zeptoyap_content) > 5000:
-                message = "The starting zeptoyap is too long, over 5000 characters!"
-                suggested_path = f"/femtoyaps/{femtoyap_id}/attoyaps/create"
-                suggestion_name = "attoyap creation"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+                return errors.render_error("The starting zeptoyap is too long, over 5000 characters!", 
+                                           "attoyap creation", 
+                                           f"/femtoyaps/{femtoyap_id}/attoyaps/create")
             username = session["username"]
             sql = "SELECT id FROM users WHERE username=:username"
             result = db.session.execute(text(sql), {"username":username})
@@ -191,28 +128,18 @@ def create_attoyap(femtoyap_id):
 @app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/<int:attoyap_id>/zeptoyaps/create", methods=["GET", "POST"])
 def create_zeptoyap(femtoyap_id, attoyap_id):
     if request.method == "GET":
-        if not "username" in session:
-            message = "You must be logged in to create zeptoyaps!"
-            suggested_path = "/login"
-            suggestion_name = "login"
-            return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+        if not users.is_logged_in():
+            return errors.render_error("You must be logged in to create zeptoyaps!", "login")
         else:
             return render_template("create_zeptoyap.html", femtoyap_id=femtoyap_id, attoyap_id=attoyap_id)
     else:
-        if session["csrf_token"] != request.form["csrf_token"]:
+        if not users.csrf_check():
             abort(403)
         else:
             zeptoyap_content = request.form["zeptoyap_content"]
-            if len(zeptoyap_content) > 5000:
-                message = "The zeptoyap is too long, over 5000 characters!"
-                suggested_path = f"/femtoyaps/{femtoyap_id}/attoyaps/{attoyap_id}/zeptoyaps/create"
-                suggestion_name = "zeptoyap creation"
-                return render_template("error.html", message=message, suggested_path=suggested_path, suggestion_name=suggestion_name)
+            zeptoyap_ok = content.zeptoyap_ok(zeptoyap_content)
+            if not zeptoyap_ok[0]:
+                return errors.render_error(zeptoyap_ok[1], "zeptoyap creation", f"/femtoyaps/{femtoyap_id}/attoyaps/{attoyap_id}/zeptoyaps/create")
             username = session["username"]
-            sql = "SELECT id FROM users WHERE username=:username"
-            result = db.session.execute(text(sql), {"username":username})
-            user_id = result.fetchone()[0]
-            sql = "INSERT INTO zeptoyaps (attoyap_id, creator_id, content) VALUES (:attoyap_id, :user_id, :zeptoyap_content)"
-            db.session.execute(text(sql), {"attoyap_id":attoyap_id, "user_id":user_id, "zeptoyap_content":zeptoyap_content})
-            db.session.commit()
+            content.create_zeptoyap(attoyap_id, zeptoyap_content, username)
             return redirect(f"/femtoyaps/{femtoyap_id}/attoyaps/{attoyap_id}")
