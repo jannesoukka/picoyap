@@ -1,13 +1,14 @@
 from app import db
 from sqlalchemy.sql import text
 
-def zeptoyap_ok(content):
-    return (len(content) <= 5000, "The starting zeptoyap is too long, over 5000 characters!")
+def create_attoyap(femtoyap_id, title, user_id):
+    sql = "INSERT INTO attoyaps (femtoyap_id, creator_id, title) VALUES (:femtoyap_id, :user_id, :title) RETURNING id"
+    result = db.session.execute(text(sql), {"femtoyap_id":femtoyap_id, "user_id":user_id, "title":title})
+    id = result.fetchone()[0]
+    db.session.commit()
+    return id
 
-def create_zeptoyap(attoyap_id, content, username):
-    sql = "SELECT id FROM users WHERE username=:username"
-    result = db.session.execute(text(sql), {"username":username})
-    user_id = result.fetchone()[0]
+def create_zeptoyap(attoyap_id, content, user_id):
     sql = "INSERT INTO zeptoyaps (attoyap_id, creator_id, content) VALUES (:attoyap_id, :user_id, :content)"
     db.session.execute(text(sql), {"attoyap_id":attoyap_id, "user_id":user_id, "content":content})
     db.session.commit()

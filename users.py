@@ -15,6 +15,12 @@ def csrf_delete():
 def csrf_new():
     session["csrf_token"] = token_hex(16)
 
+def get_user_id(username):
+    sql = "SELECT id FROM users WHERE username=:username"
+    result = db.session.execute(text(sql), {"username":username})
+    id = result.fetchone()[0]
+    return id
+
 def is_logged_in():
     return "username" in session
 

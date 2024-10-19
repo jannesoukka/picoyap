@@ -1,7 +1,7 @@
 from app import app, db
 import content
 import errors
-from flask import abort, redirect, render_template, request, session
+from flask import abort, flash, redirect, render_template, request, session
 import re
 from sqlalchemy.sql import text
 import users
@@ -101,28 +101,14 @@ def create_attoyap(femtoyap_id):
         else:
             attoyap_title = request.form["attoyap_title"]
             zeptoyap_content = request.form["zeptoyap_content"]
-            if len(attoyap_title) < 1:
-                return errors.render_error("The title is too short, less than 1 character!", 
-                                           "attoyap creation", 
-                                           f"/femtoyaps/{femtoyap_id}/attoyaps/create")
-            if len(attoyap_title) > 100:
-                return errors.render_error("The title is too long, over 100 characters!", 
-                                           "attoyap creation", 
-                                           f"/femtoyaps/{femtoyap_id}/attoyaps/create")
-            if len(zeptoyap_content) > 5000:
-                return errors.render_error("The starting zeptoyap is too long, over 5000 characters!", 
-                                           "attoyap creation", 
-                                           f"/femtoyaps/{femtoyap_id}/attoyaps/create")
+            attoyap_errors = errors.check_errors("attoyap_title", attoyap_title)
+            zeptoyap_errors = errors.check_errors("zeptoyap_content", zeptoyap_content)
+            if attoyap_errors or zeptoyap_errors:
+                return render_template("create_attoyap.html", femtoyap_id=femtoyap_id)
             username = session["username"]
-            sql = "SELECT id FROM users WHERE username=:username"
-            result = db.session.execute(text(sql), {"username":username})
-            user_id = result.fetchone()[0]
-            sql = "INSERT INTO attoyaps (femtoyap_id, creator_id, title) VALUES (:femtoyap_id, :user_id, :attoyap_title) RETURNING id"
-            result = db.session.execute(text(sql), {"femtoyap_id":femtoyap_id, "user_id":user_id, "attoyap_title":attoyap_title})
-            attoyap_id = result.fetchone()[0]
-            sql = "INSERT INTO zeptoyaps (attoyap_id, creator_id, content) VALUES (:attoyap_id, :user_id, :zeptoyap_content)"
-            db.session.execute(text(sql), {"attoyap_id":attoyap_id, "user_id":user_id, "zeptoyap_content":zeptoyap_content})
-            db.session.commit()
+            user_id = users.get_user_id(username)
+            attoyap_id = content.create_attoyap(femtoyap_id, attoyap_title, user_id)
+            content.create_zeptoyap(attoyap_id, zeptoyap_content, user_id)
             return redirect(f"/femtoyaps/{femtoyap_id}/attoyaps/{attoyap_id}")
 
 @app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/<int:attoyap_id>/zeptoyaps/create", methods=["GET", "POST"])
@@ -137,9 +123,10 @@ def create_zeptoyap(femtoyap_id, attoyap_id):
             abort(403)
         else:
             zeptoyap_content = request.form["zeptoyap_content"]
-            zeptoyap_ok = content.zeptoyap_ok(zeptoyap_content)
-            if not zeptoyap_ok[0]:
-                return errors.render_error(zeptoyap_ok[1], "zeptoyap creation", f"/femtoyaps/{femtoyap_id}/attoyaps/{attoyap_id}/zeptoyaps/create")
+            zeptoyap_errors = errors.check_errors("zeptoyap_content", zeptoyap_content)
+            if zeptoyap_errors:
+                return render_template("create_zeptoyap.html", femtoyap_id=femtoyap_id, attoyap_id=attoyap_id)
             username = session["username"]
-            content.create_zeptoyap(attoyap_id, zeptoyap_content, username)
+            user_id = users.get_user_id(username)
+            content.create_zeptoyap(attoyap_id, zeptoyap_content, user_id)
             return redirect(f"/femtoyaps/{femtoyap_id}/attoyaps/{attoyap_id}")
