@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}{% endblock %} - picoyap</title>
+    </head>
+    <body>
+        <div class="quick_links">
+            <a href="/">Return to the front page</a>
+            {% block quick_links %}{% endblock %}
+        </div>
+
+        <div class="login">
+            {% if session.username %}
+                Logged in as {{ session.username }} | <a href="/logout">Log out</a>
+            {% else %}
+                <a href="/signup">Create a new account</a> | <a href="/login">Log in</a>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <div class="header">
+            <h1>
+                picoyap - {% block header %}{% endblock %}
+            </h1>
+        </div>
+
+        <hr>
+
+        <div class="flashes">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <hr>
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>

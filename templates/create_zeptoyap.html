@@ -1,24 +1,28 @@
-<form action="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap_id }}/zeptoyaps/create" method="POST">
-<title>picoyap - create zeptoyap</title>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-<hr>
-<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap_id }}">Return to the attoyap...</a> | Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
-<hr>
-<h1>zeptoyap - create</h1>
-FILL IN ALL NECESSARY INFO.<br>
-Restrictions: The zeptoyap must be within 1-5000 characters.
-<hr>
-Content:<br>
-<textarea name="zeptoyap_content" rows="20" cols="100"></textarea><br>
-<hr>
-<input type="submit" name="Confirm zeptoyap creation">
-<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-</form>
+{% extends "base.html" %}
+{% block title %}create zeptoyap{% endblock %}
+{% block quick_links %}
+     | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap</a>
+     | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap_id }}">Return to the attoyap</a>
+     | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/create">Create a new attoyap</a>
+{% endblock %}
+{% block header %}create zeptoyap{% endblock %}
+{% block content %}
+    <form action="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap_id }}/zeptoyaps/create" method="POST">
+        FILL IN ALL NECESSARY INFO.<br>
+        <div class="restrictions">
+            Restrictions:
+            <ul>
+                {% for restriction in restrictions %}
+                    <li>{{ restriction }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <hr>
+        Content:<br>
+        <textarea name="zeptoyap_content" rows="20" cols="100"></textarea><br>
+        <hr>
+        <input type="submit" name="Confirm zeptoyap creation">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <hr>
+    </form>
+{% endblock %}

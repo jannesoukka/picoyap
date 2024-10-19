@@ -1,19 +1,18 @@
-<form action="/login" method="POST">
-<title>picoyap - login</title>
-<a href="/">Return to front page...</a>
-{% if session.username %}
- | Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
-{% endif %}
-<hr>
-<h1>picoyap - login</h1>
-FILL IN ALL NECESSARY INFO:
-<hr>
-Username:<br>
-<input type="text" name="username" minlength="1" maxlength="32" required>
-<hr>
-Password:<br>
-<input type="password" name="password" minlength="1" maxlength="5000" required>
-<hr>
-<input type="submit" name="Attempt login">
-<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-</form>
+{% extends "base.html" %}
+{% block title %}login{% endblock %}
+{% block quick_links %}{% endblock %}
+{% block header %}login{% endblock %}
+{% block content %}
+    <form action="/login" method="POST">
+        FILL IN ALL NECESSARY INFO:
+        <hr>
+        Username:<br>
+        <input type="text" name="username">
+        <hr>
+        Password:<br>
+        <input type="password" name="password">
+        <hr>
+        <input type="submit" name="Attempt login">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    </form>
+{% endblock %}

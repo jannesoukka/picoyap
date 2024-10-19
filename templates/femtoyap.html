@@ -1,26 +1,23 @@
-<title>picoyap - femtoyap</title>
-<a href="/">Return to front page...</a> | 
-{% if session.username %}
-Logged in as {{ session.username }} | <a href="/logout">Log out...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/create">Create a new attoyap...</a>
-{% else %}
-<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
-{% endif %}
-<hr>
-<h1>femtoyap - {{ femtoyap_topic }}</h1>
-TOPICAL ATTOYAPS:
-<hr>
-{% for attoyap in attoyaps %}
-<a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap.id }}">{{ attoyap.title }}</a><br>
-creator: {{ attoyap.username }} | created at: {{ attoyap.created_at.strftime("%Y-%m-%d %H:%M:%S") }} | zeptoyaps: {{ attoyap.zeptoyap_count }}
-{% if attoyap.latest_zeptoyap %}
- | latest zeptoyap: {{ attoyap.latest_zeptoyap.strftime("%Y-%m-%d %H:%M:%S") }}
-{% endif %}
-<hr>
-{% endfor %}
-<a href="/">Return to front page...</a> | 
-{% if session.username %}
-Logged in as {{ session.username }} | <a href="/logout">Log out...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/create">Create a new attoyap...</a>
-{% else %}
-<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
-{% endif %}
-<hr>
+{% extends "base.html" %}
+{% block title %}{{ femtoyap_topic }}{% endblock %}
+{% block quick_links %}
+    {% if session.username %}
+         | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/create">Create a new attoyap</a>
+    {% endif %}
+{% endblock %}
+{% block header %}femtoyap{% endblock %}
+{% block content %}
+    <h2>femtoyap - {{ femtoyap_topic }}</h2>
+    TOPICAL ATTOYAPS:
+    <hr>
+    {% for attoyap in attoyaps %}
+        <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap.id }}">{{ attoyap.title }}</a><br>
+        creator: {{ attoyap.username }}
+         | created at: {{ attoyap.created_at.strftime("%Y-%m-%d %H:%M:%S") }}
+         | zeptoyaps: {{ attoyap.zeptoyap_count }}
+            {% if attoyap.latest_zeptoyap %}
+                 | latest zeptoyap: {{ attoyap.latest_zeptoyap.strftime("%Y-%m-%d %H:%M:%S") }}
+            {% endif %}
+        <hr>
+    {% endfor %}
+{% endblock %}

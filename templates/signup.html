@@ -1,30 +1,33 @@
-<form action="/signup" method="POST">
-<title>picoyap - signup</title>
-<a href="/">Return to front page...</a>
-{% if session.username %}
- | Logged in as {{ session.username }} | <a href="/logout">Log out...</a>
-{% endif %}
-<hr>
-<h1>picoyap - signup</h1>
-FILL IN ALL NECESSARY INFO:
-<hr>
-Username:<br>
-<input type="text" name="username" pattern="^[\w._\-]{2,32}$" required>
-The username's length must be in the range of 2-32 characters, and the characters can only be alphanumeric, ".", "-", or "_".
-You cannot use a username that is already taken.
-<hr>
-Password:<br>
-<input type="password" name="password" minlength="8" maxlength="5000" required>
-The password's length must be in the range of 8-5000 characters.
-<hr>
-The same password again:<br>
-<input type="password" name="password_again" minlength="8" maxlength="5000" required>
-<hr>
-{% if session.username %}
-<input type="submit" name="Attempt logout and signup">
-{% else %}
-<input type="submit" name="Attempt signup">
-{% endif %}
-<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-</form>
-
+{% extends "base.html" %}
+{% block title %}signup{% endblock %}
+{% block quick_links %}{% endblock %}
+{% block header %}signup{% endblock %}
+{% block content %}
+    <form action="/signup" method="POST">
+        FILL IN ALL NECESSARY INFO:
+        <div class="restrictions">
+            Restrictions:
+            <ul>
+                {% for restriction in restrictions %}
+                    <li>{{ restriction }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <hr>
+        Username:<br>
+        <input type="text" name="username">
+        <hr>
+        Password:<br>
+        <input type="password" name="password">
+        <hr>
+        The same password again:<br>
+        <input type="password" name="password_again">
+        <hr>
+        {% if session.username %}
+            <input type="submit" name="Attempt logout and signup">
+        {% else %}
+            <input type="submit" name="Attempt signup">
+        {% endif %}
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    </form>
+{% endblock %}

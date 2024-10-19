@@ -1,24 +1,21 @@
-<title>picoyap - attoyap</title>
-<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | 
-{% if session.username %}
-Logged in as {{ session.username }} | <a href="/logout">Log out...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/create">Create a new attoyap...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap.id }}/zeptoyaps/create">Add a new zeptoyap...</a>
-{% else %}
-<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
-{% endif %}
-<hr>
-<h1>attoyap - {{ attoyap.title }}</h1>
-<b>Creator: {{ attoyap.username }}</b><br>
-ZEPTOYAPS:
-<hr>
-{% for zeptoyap in zeptoyaps %}
-{{ zeptoyap.content }}<br>
-creator: {{ zeptoyap.username }} | created at: {{ zeptoyap.created_at.strftime("%Y-%m-%d %H:%M:%S") }}
-<hr>
-{% endfor %}
-<a href="/">Return to front page...</a> | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap...</a> | 
-{% if session.username %}
-Logged in as {{ session.username }} | <a href="/logout">Log out...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/create">Create a new attoyap...</a> | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap.id }}/zeptoyaps/create">Add a new zeptoyap...</a>
-{% else %}
-<a href="/signup">Create a new account...</a> | <a href="/login">Log in...</a>
-{% endif %}
-<hr>
+{% extends "base.html" %}
+{% block title %}{{ attoyap.title }}{% endblock %}
+{% block quick_links %}
+     | <a href="/femtoyaps/{{ femtoyap_id }}">Return to the femtoyap</a>
+    {% if session.username %}
+         | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/create">Create a new attoyap</a>
+         | <a href="/femtoyaps/{{ femtoyap_id }}/attoyaps/{{ attoyap.id }}/zeptoyaps/create">Add a new zeptoyap</a>
+    {% endif %}
+{% endblock %}
+{% block header %}attoyap{% endblock %}
+{% block content %}
+    <h2>attoyap - {{ attoyap.title }}</h2>
+    <b>Creator: {{ attoyap.username }}</b><br>
+    ZEPTOYAPS:
+    <hr>
+    {% for zeptoyap in zeptoyaps %}
+    {{ zeptoyap.content }}<br>
+    creator: {{ zeptoyap.username }} | created at: {{ zeptoyap.created_at.strftime("%Y-%m-%d %H:%M:%S") }}
+    <hr>
+    {% endfor %}
+{% endblock %}

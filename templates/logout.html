@@ -1,10 +1,12 @@
-<form action="/logout" method="POST">
-<title>picoyap - logout</title>
-<a href="/">Return to front page...</a>
-<hr>
-<h1>picoyap - logout</h1>
-CONFIRMATION:
-<hr>
-<input type="submit" name="Confirm logout">
-<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-</form>
+{% extends "base.html" %}
+{% block title %}logout{% endblock %}
+{% block quick_links %}{% endblock %}
+{% block header %}logout{% endblock %}
+{% block content %}
+    <form action="/logout" method="POST">
+        CONFIRMATION:
+        <hr>
+        <input type="submit" name="Confirm logout">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    </form>
+{% endblock %}
