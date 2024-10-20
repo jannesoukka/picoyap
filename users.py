@@ -27,13 +27,13 @@ def is_logged_in():
 def login(username, first_time=False):
     if is_logged_in():
         if first_time:
-            errors.flash_succ("signup_again")
+            errors.flash_succ("signup_again", [username])
         else:
-            errors.flash_succ("login_again")
+            errors.flash_succ("login_again", [username])
     else:
         if first_time:
             errors.flash_succ("signup")
-        errors.flash_succ("login")
+        errors.flash_succ("login", [username])
     session["username"] = username
     csrf_new()
     return

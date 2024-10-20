@@ -7,14 +7,14 @@ limits = {}
 limits["username"] = {}
 limits["username"]["lenmax"] = 32
 limits["username"]["lenmin"] = 2
-limits["username"]["regex"] = "^[\w._\-]{2,32}$"
+limits["username"]["regex"] = "[^\w._\-]"
 limits["password"] = {}
 limits["password"]["lenmax"] = 5000
 limits["password"]["lenmin"] = 8
 limits["femtoyap_topic"] = {}
 limits["femtoyap_topic"]["lenmax"] = 32
 limits["femtoyap_topic"]["lenmin"] = 1
-limits["femtoyap_topic"]["regex"] = "^[a-z0-9_\-]{1,32}$"
+limits["femtoyap_topic"]["regex"] = "[^a-z0-9_\-]"
 limits["attoyap_title"] = {}
 limits["attoyap_title"]["lenmax"] = 100
 limits["attoyap_title"]["lenmin"] = 1
@@ -93,7 +93,7 @@ def check_errors(check_target, sample=None):
         if not users.is_logged_in():
             has_errors = True
             flash_error("login_need", check_target)
-    if check_target in limits.keys():
+    if check_target in limits.keys() and type(sample) is str:
         # expected sample type: string
         # this block is for common restrictions, like lower and upper bounds for string length and regular expressions
         # if check_target has other restrictions, they are handled in another block
@@ -107,10 +107,10 @@ def check_errors(check_target, sample=None):
                     has_errors = True
                     flash_error(check_target, limit)
             if limit == "regex":
-                if not re.search(limits[check_target][limit], sample):
+                if re.search(limits[check_target][limit], sample) and sample != "":
                     has_errors = True
                     flash_error(check_target, limit)
-    if check_target == "password":
+    if check_target == "password" and type(sample) is tuple:
         # expected sample type: 2-tuple: (password, password_again)
         if sample[1] != sample[0]:
             has_errors = True
@@ -121,11 +121,11 @@ def flash_error(upper_key, lower_key):
     flash(error_msgs[upper_key][lower_key], "error")
     return
 
-def flash_succ(action, parameters=None):
+def flash_succ(action, params=None):
     base = succ_msgs[action]
-    if parameters:
+    if params:
         # expected type of parameters: list
-        temp = map(lambda base_part, params : params[base_part] if type(base_part) is int else base_part, base)
+        temp = map(lambda base_part : params[base_part] if type(base_part) is int else base_part, base)
         base = "".join(list(temp))
     flash(base, "info")
     return
