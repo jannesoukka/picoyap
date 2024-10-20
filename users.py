@@ -26,46 +26,43 @@ def is_logged_in():
 
 def login(username, first_time=False):
     if is_logged_in():
-        message = "logged out and "
+        if first_time:
+            errors.flash_succ("signup_again")
+        else:
+            errors.flash_succ("login_again")
     else:
-        message = ""
+        if first_time:
+            errors.flash_succ("signup")
+        errors.flash_succ("login")
     session["username"] = username
     csrf_new()
-    if first_time:
-        variation = "created a new account. You are now "
-    else:
-        variation = ""
-    message = f"Successfully {message}{variation}logged in as {username}."
-    return render_template("success.html", message=message)
+    return
 
-def login_ok(username, password):
+def login_check(username, password):
     sql = "SELECT password_hash FROM users WHERE username=:username"
     result = db.session.execute(text(sql), {"username":username})
     user = result.fetchone()
     if not user:
-        return (False, "Username does not exist")
-    if check_password_hash(user.password_hash, password):
-        return (True, "")
-    return (False, "Wrong password")
+        errors.flash_error("username", "exist")
+        return False
+    if not check_password_hash(user.password_hash, password):
+        errors.flash_error("password_login", "wrong")
+        return False
+    return True
 
 def logout():
+    errors.flash_succ("logout")
     del session["username"]
     csrf_delete()
-    message = "Successfully logged out."
-    return render_template("success.html", message=message)
+    return
 
-def signup(username, password, password_again):
-    if not re.search("^[\w._\-]{2,32}$", username):
-        return errors.render_error("Invalid username", "signup")
-    if password != password_again:
-        return errors.render_error("Password inputs do not match", "signup")
-    if len(password) < 8 or len(password) > 5000:
-        return errors.render_error("Invalid password length", "signup")
+def signup_try(username, password):
     password_hash = generate_password_hash(password)
     try:
         sql = "INSERT INTO users (username, password_hash) VALUES (:username, :password_hash)"
         db.session.execute(text(sql), {"username":username, "password_hash":password_hash})
         db.session.commit()
     except:
-        return errors.render_error("Username already taken", "signup")
-    return login(username, True)
+        errors.flash_error("username", "unique")
+        return False
+    return True

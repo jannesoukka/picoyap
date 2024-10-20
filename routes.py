@@ -49,11 +49,12 @@ def attoyap(femtoyap_id, attoyap_id):
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
+    template = "signup.html"
     restrictions = errors.get_restrictions("username")
     restrictions.extend(errors.get_restrictions("password"))
     if request.method == "GET":
         users.csrf_new()
-        return render_template("signup.html", restrictions=restrictions)
+        return render_template(template, restrictions=restrictions)
     else:
         if not users.csrf_check():
             abort(403)
@@ -61,45 +62,59 @@ def signup():
             username = request.form["username"]
             password = request.form["password"]
             password_again = request.form["password_again"]
-            return users.signup(username, password, password_again)
+            username_errors = errors.check_errors("username", username)
+            password_errors = errors.check_errors("password", (password, password_again))
+            if username_errors or password_errors:
+                return render_template(template, restrictions=restrictions)
+            signup_ok = users.signup_try(username, password)
+            if not signup_ok:
+                return render_template(template, restrictions=restrictions)
+            users.login(username, True)
+            return redirect("/")
     
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    template = "login.html"
     if request.method == "GET":
         users.csrf_new()
-        return render_template("login.html")
+        return render_template(template)
     else:
         if not users.csrf_check():
             abort(403)
         else:
             username = request.form["username"]
             password = request.form["password"]
-            login_ok = users.login_ok(username, password)
-            if not login_ok[0]:
-                return errors.render_error(login_ok[1], "login")
-            return users.login(username)
+            login_ok = users.login_check(username, password)
+            if not login_ok:
+                return render_template(template)
+            users.login(username)
+            return redirect("/")
         
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
+    template = "logout.html"
     if request.method == "GET":
-        if not users.is_logged_in():
-            return errors.render_error("Cannot log out if not logged in the first place!", "login")
-        return render_template("logout.html")
+        not_logged_in = errors.check_errors("logout")
+        if not_logged_in:
+            return redirect("/login")
+        return render_template(template)
     else:
         if not users.csrf_check():
             abort(403)
         else:
-            return users.logout()
+            users.logout()
+            return redirect("/")
     
 @app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/create", methods=["GET", "POST"])
 def create_attoyap(femtoyap_id):
+    template = "create_attoyap.html"
     restrictions = errors.get_restrictions("attoyap_title")
     restrictions.extend(errors.get_restrictions("zeptoyap_content"))
     if request.method == "GET":
-        has_errors = errors.check_errors("create_attoyap")
-        if has_errors:
+        not_logged_in = errors.check_errors("create_attoyap")
+        if not_logged_in:
             return redirect("/login")
-        return render_template("create_attoyap.html", femtoyap_id=femtoyap_id, restrictions=restrictions)
+        return render_template(template, femtoyap_id=femtoyap_id, restrictions=restrictions)
     else:
         if not users.csrf_check():
             abort(403)
@@ -109,7 +124,7 @@ def create_attoyap(femtoyap_id):
             attoyap_errors = errors.check_errors("attoyap_title", attoyap_title)
             zeptoyap_errors = errors.check_errors("zeptoyap_content", zeptoyap_content)
             if attoyap_errors or zeptoyap_errors:
-                return render_template("create_attoyap.html", femtoyap_id=femtoyap_id, restrictions=restrictions)
+                return render_template(template, femtoyap_id=femtoyap_id, restrictions=restrictions)
             username = session["username"]
             user_id = users.get_user_id(username)
             attoyap_id = content.create_attoyap(femtoyap_id, attoyap_title, user_id)
@@ -118,13 +133,14 @@ def create_attoyap(femtoyap_id):
 
 @app.route("/femtoyaps/<int:femtoyap_id>/attoyaps/<int:attoyap_id>/zeptoyaps/create", methods=["GET", "POST"])
 def create_zeptoyap(femtoyap_id, attoyap_id):
+    template = "create_zeptoyap.html"
     restrictions = errors.get_restrictions("zeptoyap_content")
     if request.method == "GET":
-        has_errors = errors.check_errors("create_zeptoyap")
-        if has_errors:
+        not_logged_in = errors.check_errors("create_zeptoyap")
+        if not_logged_in:
             return redirect("/login")
         else:
-            return render_template("create_zeptoyap.html", femtoyap_id=femtoyap_id, attoyap_id=attoyap_id, restrictions=restrictions)
+            return render_template(template, femtoyap_id=femtoyap_id, attoyap_id=attoyap_id, restrictions=restrictions)
     else:
         if not users.csrf_check():
             abort(403)
@@ -132,7 +148,7 @@ def create_zeptoyap(femtoyap_id, attoyap_id):
             zeptoyap_content = request.form["zeptoyap_content"]
             zeptoyap_errors = errors.check_errors("zeptoyap_content", zeptoyap_content)
             if zeptoyap_errors:
-                return render_template("create_zeptoyap.html", femtoyap_id=femtoyap_id, attoyap_id=attoyap_id, restrictions=restrictions)
+                return render_template(template, femtoyap_id=femtoyap_id, attoyap_id=attoyap_id, restrictions=restrictions)
             username = session["username"]
             user_id = users.get_user_id(username)
             content.create_zeptoyap(attoyap_id, zeptoyap_content, user_id)
