@@ -1,5 +1,6 @@
 from flask import flash, render_template
 import re
+import users
 
 limits = {}
 limits["username"] = {}
@@ -66,22 +67,31 @@ error_msgs["attoyap_title"]["lenmin"] = f"The attoyap title is too short, less t
 error_msgs["zeptoyap_content"] = {}
 error_msgs["zeptoyap_content"]["lenmax"] = f"The zeptoyap is too long, over {limits['zeptoyap_content']['lenmax']} characters!"
 error_msgs["zeptoyap_content"]["lenmin"] = f"The zeptoyap is too short, less than {limits['zeptoyap_content']['lenmin']} characters!"
+error_msgs["login_need"] = {}
+error_msgs["login_need"]["base"] = "You are not logged in!"
+error_msgs["login_need"]["create_attoyap"] = f"{error_msgs['login_need']['base']} You must be logged in to create attoyaps!"
+error_msgs["login_need"]["create_zeptoyap"] = f"{error_msgs['login_need']['base']} You must be logged in to create zeptoyaps!"
 
-def check_errors(restriction_target, sample):
+def check_errors(check_target, sample=""):
     has_errors = False
-    for limit in limits[restriction_target].keys():
-        if limit == "lenmax":
-            if limits[restriction_target][limit] < len(sample):
-                has_errors = True
-                flash(error_msgs[restriction_target][limit], "error")
-        if limit == "lenmin":
-            if limits[restriction_target][limit] > len(sample):
-                has_errors = True
-                flash(error_msgs[restriction_target][limit], "error")
-        if limit == "regex":
-            if not re.search(limits[restriction_target][limit], sample):
-                has_errors = True
-                flash(error_msgs[restriction_target][limit], "error")
+    if check_target in error_msgs["login_need"].keys():
+        if not users.is_logged_in():
+            has_errors = True
+            flash(error_msgs["login_need"][check_target])
+    if check_target in limits.keys():
+        for limit in limits[check_target].keys():
+            if limit == "lenmax":
+                if limits[check_target][limit] < len(sample):
+                    has_errors = True
+                    flash(error_msgs[check_target][limit], "error")
+            if limit == "lenmin":
+                if limits[check_target][limit] > len(sample):
+                    has_errors = True
+                    flash(error_msgs[check_target][limit], "error")
+            if limit == "regex":
+                if not re.search(limits[check_target][limit], sample):
+                    has_errors = True
+                    flash(error_msgs[check_target][limit], "error")
     return has_errors
 
 def get_restrictions(restriction_target):

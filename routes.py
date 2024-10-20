@@ -96,8 +96,9 @@ def create_attoyap(femtoyap_id):
     restrictions = errors.get_restrictions("attoyap_title")
     restrictions.extend(errors.get_restrictions("zeptoyap_content"))
     if request.method == "GET":
-        if not users.is_logged_in():
-            return errors.render_error("You must be logged in to create attoyaps!", "login")
+        has_errors = errors.check_errors("create_attoyap")
+        if has_errors:
+            return redirect("/login")
         return render_template("create_attoyap.html", femtoyap_id=femtoyap_id, restrictions=restrictions)
     else:
         if not users.csrf_check():
@@ -119,8 +120,9 @@ def create_attoyap(femtoyap_id):
 def create_zeptoyap(femtoyap_id, attoyap_id):
     restrictions = errors.get_restrictions("zeptoyap_content")
     if request.method == "GET":
-        if not users.is_logged_in():
-            return errors.render_error("You must be logged in to create zeptoyaps!", "login")
+        has_errors = errors.check_errors("create_zeptoyap")
+        if has_errors:
+            return redirect("/login")
         else:
             return render_template("create_zeptoyap.html", femtoyap_id=femtoyap_id, attoyap_id=attoyap_id, restrictions=restrictions)
     else:
