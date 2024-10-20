@@ -8,13 +8,14 @@ import users
 
 @app.route("/")
 def index():
-    sql = "SELECT f.id, f.topic, COALESCE(COUNT(DISTINCT a.id),0) AS attoyap_count, COALESCE(COUNT(z.id),0) AS zeptoyap_count, " \
-          "MAX(a.created_at) AS latest_attoyap, MAX(z.created_at) AS latest_zeptoyap " \
-          "FROM femtoyaps f LEFT JOIN attoyaps a ON f.id = a.femtoyap_id LEFT JOIN zeptoyaps z ON a.id = z.attoyap_id GROUP BY f.id " \
-          "ORDER BY f.topic"
-    result = db.session.execute(text(sql))
-    femtoyaps = result.fetchall()
-    return render_template("index.html", femtoyaps=femtoyaps)
+    template = "index.html"
+    username = users.is_logged_in(True)
+    user_id = users.get_user_id(username)
+    if users.is_admin(user_id):
+        user_id = -1
+    femtoyaps = content.view_picoyap_public()
+    secret_femtoyaps = content.view_picoyap_secret(user_id)
+    return render_template(template, femtoyaps=femtoyaps, secret_femtoyaps=secret_femtoyaps)
 
 @app.route("/femtoyaps/<int:femtoyap_id>")
 def femtoyap(femtoyap_id):

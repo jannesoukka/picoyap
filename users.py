@@ -16,13 +16,34 @@ def csrf_new():
     session["csrf_token"] = token_hex(16)
 
 def get_user_id(username):
-    sql = "SELECT id FROM users WHERE username=:username"
-    result = db.session.execute(text(sql), {"username":username})
-    id = result.fetchone()[0]
-    return id
+    if username == "":
+        id = 0
+    else:
+        sql = "SELECT id FROM users WHERE username=:username"
+        result = db.session.execute(text(sql), {"username":username})
+        id = result.fetchone()[0]
+    return id    
 
-def is_logged_in():
-    return "username" in session
+def is_admin(user_id):
+    if user_id == 0:
+        return False
+    sql = "SELECT is_admin FROM users WHERE id=:user_id"
+    result = db.session.execute(text(sql), {"user_id":user_id})
+    is_admin = result.fetchone()[0]
+    if is_admin == "t":
+        is_admin = True
+    else:
+        is_admin = False
+    return is_admin
+
+def is_logged_in(ask_who=False):
+    # ask_who: bool. request to return username.
+    logged_in = "username" in session
+    if not ask_who:
+        return logged_in
+    if not logged_in:
+        return ""
+    return session["username"]
 
 def login(username, first_time=False):
     if is_logged_in():

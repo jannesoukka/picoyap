@@ -21,23 +21,25 @@ OHJEET TESTAAMISEEN:
 
 Sovellusta ei voi testata Fly.io-palvelussa. Tässä ohjeet paikalliseen testaamiseen: 
 
-git clone https://github.com/jannesoukka/picoyap.git
-cd picoyap/
-python3 -m venv venv
-source venv/bin/activate
-pip install flask
-pip install flask sql-alchemy
-pip install psycopg2-binary
-pip install python-dotenv
+- git clone https://github.com/jannesoukka/picoyap.git
+- cd picoyap/
+- python3 -m venv venv
+- source venv/bin/activate
+- pip install flask
+- pip install flask sql-alchemy
+- pip install psycopg2-binary
+- pip install python-dotenv
 
-luo .env tiedosto jossa määrittelet ympäristömuuttujat (niitä on kaksi: SECRET_KEY ja DATABASE_URL)
+- luo .env tiedosto jossa määrittelet ympäristömuuttujat (niitä on kaksi: SECRET_KEY ja DATABASE_URL)
 
 suorita myös seuraavat komennot ennen ohjelman suorittamista:
-psql
-create database picoyap;
-\q
-psql -d picoyap < schema.sql
-psql -d picoyap < seed.sql
+- psql
+- create database picoyap;
+- \q
+- psql -d picoyap < schema.sql
+- psql -d picoyap < seed.sql
+
+voit testata ylläpitäjän käyttäjää "admintest" salasanalla "bigscary", jotka tulevat seed.sql:stä.
 
 -------------------------------
 
@@ -63,3 +65,31 @@ ei vielä:
 - käyttäjä voi etsiä kaikki viestit, joiden osana on antamansa sana
 - ylläpitäjä voi lisäksi lisätä ja poistaa femtoyapeja
 - ylläpitäjä voi luoda salaisen femtoyapin ja määrittää, keillä on pääsy kyseiseen femtoyapiin.
+
+---------------------------------
+
+PÄIVITYS 20.10.2024:
+
+tilanne: 
+
+Sovellus on keskeneräinen, ei voi mitään.
+Käytännössä viimeiset kaksi viikkoa on ollut koodin refaktorointia, mikä ei sekään tullut valmiiksi.
+Suuri painotus on ollut virheiden käsittelyssä sekä sivupohjien refaktoroinnissa (muut sivupohjat perivät ominaisuuksia base.html:stä).
+Ideana olisi ollut, että noiden viimeisten toiminnallisuuksien lisääminen olisi tullut yksinkertaisemmaksi ja johdonmukaisemmaksi.
+
+toiminnallisuudet:
+- sovelluksen etusivulla on lista femtoyapeista, ja kussakin näkyy ketjujen ja viestien lukumäärät sekä uusimman viestin ajankohta
+- käyttäjä voi luoda uuden tunnuksen
+- käyttäjä voi kirjautua sisään ja ulos
+- käyttäjä voi luoda femtoyapiin uuden ketjun antamalla ketjulle otsikon ja aloitusviestin
+- käyttäjä voi luoda ketjuun (attoyapiin) uuden viestin (zeptoyapin)
+
+en ehtinyt laittaa:
+- käyttäjä voi muokata ja poistaa omia ketjuja ja viestejä
+- käyttäjä voi etsiä kaikki viestit, joiden osana on antamansa sana
+- ylläpitäjä voi lisäksi lisätä ja poistaa femtoyapeja
+- ylläpitäjä voi luoda salaisen femtoyapin ja määrittää, keillä on pääsy kyseiseen femtoyapiin.
+- ulkoasun parantaminen
+
+muita ongelmia:
+- salaisten femtoyapien lista etusivulla ei jostain syystä näy
